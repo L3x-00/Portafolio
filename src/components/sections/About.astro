@@ -1,0 +1,128 @@
+---
+import SectionTitle from '../ui/SectionTitle.astro';
+import RevealText from '../animations/RevealText.astro';
+import ParallaxImage from '../animations/ParallaxImage.astro';
+---
+
+<section id="sobre-mi" class="about section-pad">
+  <div class="about-inner container">
+    <div class="about-image">
+      <ParallaxImage
+        src="/images/alex.png"
+        alt="Foto de perfil"
+      />
+      <div class="about-image__tag">
+        <span class="about-image__tag-dot"></span>
+        Disponible para nuevos retos
+      </div>
+    </div>
+
+    <div class="about-text">
+      <SectionTitle label="Sobre mí" title="Ingeniería y creatividad, unidas." />
+
+      <RevealText delay={0.1}>
+        <p class="about-p">
+          Soy un <strong>Desarrollador Fullstack y consultor TI</strong> con una visión integral del producto. 
+          Desarrollo soluciones robustas desde la arquitectura backend hasta experiencias móviles nativas. 
+          Mi enfoque une el rigor del código limpio con la libertad del diseño gráfico y la potencia de la Inteligencia Artificial.
+        </p>
+      </RevealText>
+
+      <RevealText delay={0.2}>
+        <p class="about-p">
+          Ya sea escalando marketplaces de alta complejidad, 
+          creando activos visuales con IA o puliendo la UI/UX de una aplicación móvil, 
+          mi objetivo siempre es el mismo: transformar necesidades complejas en tecnología tangible que impacta.
+        </p>
+      </RevealText>
+
+      <div class="about-stats">
+        {[
+          { n: 'Fullstack', label: 'Backend + Frontend' },
+          { n: 'Mobile',    label: 'Apps Nativas' },
+          { n: 'Creativo',  label: 'Diseño + IA' },
+        ].map(s => (
+          <div class="about-stat">
+            <span class="about-stat__n">{s.n}</span>
+            <span class="about-stat__l">{s.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-pad  { padding: 7rem 0; }
+  .container    { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+
+  .about-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  @media (max-width: 768px) {
+    .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .about-image { order: -1; max-width: 380px; margin: 0 auto; width: 100%; }
+  }
+
+  .about-image { position: relative; border-radius: 4px; }
+  .about-image__tag {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    background: rgba(5,5,5,0.9);
+    border: 1px solid rgba(0,240,255,0.3);
+    border-radius: 100px;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+  }
+  .about-image__tag-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent-green);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+  }
+
+  .about-text { display: flex; flex-direction: column; gap: 1.75rem; }
+
+  .about-p {
+    font-size: 1.0625rem;
+    color: var(--color-muted);
+    line-height: 1.8;
+  }
+  .about-p em { color: var(--color-text); font-style: normal; }
+
+  .about-stats {
+    display: flex;
+    gap: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    flex-wrap: wrap;
+  }
+  .about-stat { display: flex; flex-direction: column; gap: 0.25rem; }
+  .about-stat__n {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    line-height: 1;
+  }
+  .about-stat__l {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+</style>

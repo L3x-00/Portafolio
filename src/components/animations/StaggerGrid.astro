@@ -1,0 +1,54 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+---
+
+<div class={`stagger-grid ${className}`}>
+  <slot />
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initStagger() {
+    document.querySelectorAll<HTMLElement>('.stagger-grid:not([data-sg])').forEach((grid) => {
+      grid.dataset.sg = '1';
+      const children = Array.from(grid.children) as HTMLElement[];
+      
+      children.forEach(child => {
+        gsap.killTweensOf(child);
+        ScrollTrigger.getAll().forEach(trigger => {
+          if (trigger.trigger === child || trigger.trigger === grid) trigger.kill();
+        });
+      });
+
+      // Forzamos estado oculto
+      gsap.set(children, { y: 60, opacity: 0 });
+
+      // RED DE SEGURIDAD: ¿La cuadrícula ya está en pantalla?
+      const rect = grid.getBoundingClientRect();
+      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isInView) {
+        // Sí está visible: Animar inmediatamente
+        gsap.to(children, {
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out'
+        });
+      } else {
+        // No está visible: Usar ScrollTrigger
+        gsap.to(children, {
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+          scrollTrigger: { trigger: grid, start: 'top bottom-=100px', once: true }
+        });
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initStagger);
+  // Forzar ejecución inmediata en carga inicial
+  initStagger();
+</script>

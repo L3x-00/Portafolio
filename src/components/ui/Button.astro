@@ -1,0 +1,59 @@
+---
+interface Props {
+  text: string;
+  href?: string;
+  variant?: 'primary' | 'ghost';
+  target?: string;
+}
+const { text, href = '#', variant = 'primary', target = '_self' } = Astro.props;
+---
+
+<a href={href} target={target} class={`btn btn--${variant}`}>
+  <span class="btn__text">{text}</span>
+  <span class="btn__glow"></span>
+</a>
+
+<style>
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    border-radius: 2px;
+    overflow: hidden;
+    transition: color 0.3s;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn--primary {
+    color: #050505;
+    background: var(--color-accent);
+    border: 1px solid var(--color-accent);
+  }
+  .btn--primary:hover { background: transparent; color: var(--color-accent); }
+
+  .btn--ghost {
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid var(--color-border);
+  }
+  .btn--ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  .btn__glow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: radial-gradient(circle at 50% 50%, var(--color-accent), transparent 70%);
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .btn:hover .btn__glow { opacity: 0.15; }
+
+  .btn__text { position: relative; z-index: 1; }
+</style>

@@ -1,0 +1,51 @@
+---
+interface Props {
+  tag?: string;
+  delay?: number;
+  class?: string;
+}
+const { tag = 'div', delay = 0, class: className = '' } = Astro.props;
+const Tag = tag as any;
+const uid = `rv-${Math.random().toString(36).slice(2,8)}`;
+---
+
+<div id={uid} class={`reveal-host ${className}`} style="overflow: hidden;">
+  <slot />
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initReveal() {
+    document.querySelectorAll<HTMLElement>('.reveal-host:not([data-rv])').forEach((el) => {
+      el.dataset.rv = '1';
+      const delay = parseFloat(el.dataset.delay || '0');
+      const inner = el.firstElementChild as HTMLElement;
+      if (!inner) return;
+
+      // Forzamos estado oculto
+      gsap.set(inner, { y: 40, opacity: 0 });
+
+      // RED DE SEGURIDAD: ¿El elemento ya está en la pantalla al cargar?
+      const rect = el.getBoundingClientRect();
+      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+
+      if (isInView) {
+        // Sí está visible: Animar inmediatamente sin ScrollTrigger
+        gsap.to(inner, { y: 0, opacity: 1, duration: 0.9, delay: delay, ease: 'power3.out' });
+      } else {
+        // No está visible: Usar ScrollTrigger normal
+        gsap.to(inner, {
+          y: 0, opacity: 1, duration: 0.9, delay: delay, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top bottom-=100px', once: true }
+        });
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initReveal);
+  // Forzar ejecución inmediata en carga inicial
+  initReveal();
+</script>

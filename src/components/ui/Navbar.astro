@@ -1,0 +1,148 @@
+---
+const links = [
+  { href: '#sobre-mi', label: 'Sobre mí' },
+  { href: '#proyectos', label: 'Proyectos' },
+  { href: '#stack',     label: 'Stack' },
+  { href: '#contacto',  label: 'Contacto' },
+];
+---
+
+<header id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">DEV<span class="nav-logo__dot">.</span></a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+      {links.map(l => <a href={l.href} class="nav-link">{l.label}</a>)}
+    </nav>
+
+    <button id="nav-toggle" class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+    {links.map(l => <a href={l.href} class="mobile-link">{l.label}</a>)}
+  </div>
+</header>
+
+<script>
+  const toggle  = document.getElementById('nav-toggle')!;
+  const menu    = document.getElementById('mobile-menu')!;
+  const navbar  = document.getElementById('navbar')!;
+
+  toggle.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    toggle.classList.toggle('active', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    menu.setAttribute('aria-hidden', String(!open));
+  });
+
+  menu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      menu.classList.remove('open');
+      toggle.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    });
+  });
+
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+</script>
+
+<style>
+  #navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  #navbar.scrolled {
+    background: rgba(5,5,5,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--color-accent);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+  }
+  .nav-logo__dot { color: var(--color-text); }
+
+  .nav-links { display: flex; gap: 2.5rem; }
+  @media (max-width: 768px) { .nav-links { display: none; } }
+
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--color-accent); }
+
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+  @media (max-width: 768px) { .nav-toggle { display: flex; } }
+
+  .nav-toggle span {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--color-text);
+    transition: transform 0.3s, opacity 0.3s;
+    transform-origin: center;
+  }
+  .nav-toggle.active span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-toggle.active span:nth-child(2) { opacity: 0; }
+  .nav-toggle.active span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(5,5,5,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--color-border);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  @media (max-width: 768px) { .mobile-menu { display: flex; } }
+  .mobile-menu.open { max-height: 400px; }
+
+  .mobile-link {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--color-border);
+    transition: color 0.2s, padding-left 0.2s;
+  }
+  .mobile-link:hover { color: var(--color-accent); padding-left: 2.5rem; }
+</style>

@@ -1,0 +1,66 @@
+---
+import SectionTitle from '../ui/SectionTitle.astro';
+import Button from '../ui/Button.astro';
+import RevealText from '../animations/RevealText.astro';
+---
+
+<section id="contacto" class="contact section-pad">
+  <div class="container">
+    <div class="contact-inner">
+      <SectionTitle label="Contacto" title="¿Tienes un proyecto?" align="center" />
+
+      <RevealText delay={0.1}>
+        <p class="contact-desc">
+          Estoy disponible para proyectos freelance, colaboraciones y posiciones
+          a tiempo completo. Si tienes una idea que quieres convertir en una
+          experiencia extraordinaria, hablemos.
+        </p>
+      </RevealText>
+
+      <RevealText delay={0.2}>
+        <div class="contact-actions">
+          <Button text="https://www.oficioapp.org.pe/p/desarrollador-full-stack →" href="mailto:https://www.oficioapp.org.pe/p/desarrollador-full-stack" variant="primary" />
+          <Button text="LinkedIn" href="https://www.linkedin.com/in/alexander-huanaco-quispe-0290362a1/" variant="ghost" target="_blank" />
+        </div>
+      </RevealText>
+
+      <div class="contact-line"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-pad { padding: 7rem 0; }
+  .container   { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+
+  .contact-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .contact-desc {
+    font-size: 1.0625rem;
+    color: var(--color-muted);
+    line-height: 1.8;
+  }
+
+  .contact-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .contact-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    margin-top: 2rem;
+    opacity: 0.3;
+  }
+</style>

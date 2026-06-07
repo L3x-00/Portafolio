@@ -1,0 +1,165 @@
+---
+import { projects } from '../../data/projects';
+import type { Project } from '../../types';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/ui/Navbar.astro';
+import Footer from '../../components/ui/Footer.astro';
+import Button from '../../components/ui/Button.astro';
+
+export async function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props:  { project },
+  }));
+}
+
+interface Props { project: Project }
+const { project } = Astro.props;
+---
+
+<Layout title={`${project.title} | Portafolio`} description={project.description}>
+  <Navbar />
+
+  <main class="project-main">
+    <article class="project-article">
+
+      <header class="project-header container">
+        <div class="project-header__meta">
+          <a href="/#proyectos" class="project-back">← Volver</a>
+          <span class="project-year">{project.year}</span>
+        </div>
+        <h1 class="project-title">{project.title}</h1>
+        <div class="project-tags">
+          {project.tags.map(tag => (
+            <span class="project-tag">{tag}</span>
+          ))}
+        </div>
+      </header>
+
+      <div class="project-hero-image">
+        <img src={project.image} alt={project.title} />
+      </div>
+
+      <div class="project-body container">
+        <div class="project-desc">
+          <h2 class="project-section-title">El proyecto</h2>
+          <p class="project-long-desc">{project.longDesc}</p>
+        </div>
+
+        <div class="project-actions">
+          <Button text="Ver en vivo →" href={project.url} variant="primary" target="_blank" />
+          <Button text="Código fuente" href={project.url} variant="ghost" target="_blank" />
+        </div>
+      </div>
+
+    </article>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style is:global>
+  .project-main {
+    padding-top: 6rem;
+    min-height: 100dvh;
+  }
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .project-header {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .project-header__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .project-back {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .project-back:hover { color: var(--color-accent); }
+
+  .project-year {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .project-title {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.05;
+  }
+
+  .project-tags {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .project-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+    border: 1px solid rgba(0,240,255,0.25);
+    padding: 0.35rem 0.9rem;
+    border-radius: 2px;
+  }
+
+  .project-hero-image {
+    width: 100%;
+    aspect-ratio: 16/7;
+    overflow: hidden;
+  }
+  .project-hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .project-body {
+    padding-top: 4rem;
+    padding-bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .project-section-title {
+    font-size: 1rem;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 1.25rem;
+  }
+
+  .project-long-desc {
+    font-size: 1.125rem;
+    color: var(--color-muted);
+    line-height: 1.9;
+    max-width: 720px;
+  }
+
+  .project-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+</style>
