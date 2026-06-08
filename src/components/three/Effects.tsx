@@ -17,10 +17,6 @@ export default function Effects() {
         radialModulation={false}
         modulationOffset={0}
       />
-      <Noise
-        opacity={0.04}
-        blendFunction={BlendFunction.ADD}
-      />
     </EffectComposer>
   );
 }

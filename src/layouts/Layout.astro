@@ -26,6 +26,17 @@ const {
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <!--
+      is:inline = corre SINCRÓNICAMENTE antes de que el navegador procese
+      la restauración de scroll. Evita el bug del F5.
+    -->
+    <script is:inline>
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+    </script>
+
     <ClientRouter />
   </head>
   <body>
@@ -39,36 +50,94 @@ const {
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
+  gsap.ticker.lagSmoothing(0);
 
+  let _lenisTicker: ((time: number) => void) | null = null;
+
+  // Función para actualizar la URL sin recargar (Scroll Spy)
+  function updateUrlHash() {
+    const sections = document.querySelectorAll('section[id]');
+    let currentSection = '';
+    
+    sections.forEach(section => {
+      const sectionTop = (section as HTMLElement).offsetTop - 150; // Offset para compensar el Navbar
+      if (window.scrollY >= sectionTop) {
+        currentSection = section.getAttribute('id') || '';
+      }
+    });
+
+    if (currentSection && window.location.hash !== `#${currentSection}`) {
+      history.replaceState(null, '', `#${currentSection}`);
+    } else if (!currentSection && window.location.hash !== '') {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }
+  
   function setupScroll() {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // --- LIMPIEZA ---
+    if (_lenisTicker) {
+      gsap.ticker.remove(_lenisTicker);
+      _lenisTicker = null;
+    }
+    const prevLenis = (window as any).__lenis as InstanceType<typeof Lenis> | undefined;
+    if (prevLenis) prevLenis.destroy();
+    ScrollTrigger.getAll().forEach((t) => t.kill());
 
+    // --- PREFERS-REDUCED-MOTION ---
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
-      gsap.globalTimeline.timeScale(0);
+      gsap.globalTimeline.timeScale(1);
+      Promise.resolve().then(() => {
+        document.dispatchEvent(new CustomEvent('animations:ready', { detail: { reduced: true } }));
+      });
       return;
     }
 
+    // --- INICIALIZAR LENIS ---
     const lenis = new Lenis({ autoRaf: false });
+    
+    lenis.on('scroll', () => {
+      ScrollTrigger.update();
+      updateUrlHash(); // Actualiza la URL mientras se hace scroll
+    });
 
-    lenis.on('scroll', ScrollTrigger.update);
-
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
-
+    _lenisTicker = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(_lenisTicker);
     (window as any).__lenis = lenis;
-    (window as any).__gsap  = gsap;
-    (window as any).__ST    = ScrollTrigger;
+
+    // --- INTERCEPTAR CLICKS DEL MENÚ ---
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const targetId = anchor.getAttribute('href');
+        if (targetId && targetId !== '#') {
+          e.preventDefault();
+          const targetElement = document.querySelector(targetId as string);
+          if (targetElement) {
+            lenis.scrollTo(targetElement as HTMLElement, { 
+              offset: -80, // Se detiene 80px arriba para no taparlo con el Navbar
+              immediate: false 
+            });
+          }
+        }
+      });
+    });
+    console.log('Layout envía animations:ready');
+    // --- DESPACHAR EVENTO Y REFRESH ---
+    Promise.resolve().then(() => {
+      document.dispatchEvent(new CustomEvent('animations:ready', { detail: { reduced: false } }));
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh(true);
+          updateUrlHash(); // Actualizar URL si se hizo F5 a mitad de página
+        });
+      });
+    });
   }
 
+  // Carga inicial
   setupScroll();
 
-  document.addEventListener('astro:page-load', () => {
-    const lenis = (window as any).__lenis as Lenis | undefined;
-    if (lenis) {
-      lenis.destroy();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    }
-    setupScroll();
-    ScrollTrigger.refresh();
-  });
+  // Astro View Transitions: re-inicializar en cada navegación interna
+  document.addEventListener('astro:page-load', setupScroll);
 </script>

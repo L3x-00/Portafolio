@@ -1,16 +1,14 @@
 ---
 interface Props {
-  tag?: string;
   delay?: number;
   class?: string;
 }
-const { tag = 'div', delay = 0, class: className = '' } = Astro.props;
-const Tag = tag as any;
-const uid = `rv-${Math.random().toString(36).slice(2,8)}`;
+const { delay = 0, class: className = '' } = Astro.props;
 ---
 
-<div id={uid} class={`reveal-host ${className}`} style="overflow: hidden;">
+<div class={`reveal-host ${className}`} data-delay={delay.toString()}>
   <slot />
+  
 </div>
 
 <script>
@@ -25,27 +23,31 @@ const uid = `rv-${Math.random().toString(36).slice(2,8)}`;
       const inner = el.firstElementChild as HTMLElement;
       if (!inner) return;
 
-      // Forzamos estado oculto
       gsap.set(inner, { y: 40, opacity: 0 });
 
-      // RED DE SEGURIDAD: ¿El elemento ya está en la pantalla al cargar?
-      const rect = el.getBoundingClientRect();
-      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-
-      if (isInView) {
-        // Sí está visible: Animar inmediatamente sin ScrollTrigger
-        gsap.to(inner, { y: 0, opacity: 1, duration: 0.9, delay: delay, ease: 'power3.out' });
-      } else {
-        // No está visible: Usar ScrollTrigger normal
-        gsap.to(inner, {
-          y: 0, opacity: 1, duration: 0.9, delay: delay, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top bottom-=100px', once: true }
-        });
-      }
+      gsap.to(inner, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        delay,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',      // Aparece al bajar
+          end: 'bottom 15%',    // Empieza a desaparecer cuando su parte inferior toca el 15% de arriba (muy generoso)
+          toggleActions: "play reverse play reverse",
+        },
+      });
     });
   }
 
-  document.addEventListener('astro:page-load', initReveal);
-  // Forzar ejecución inmediata en carga inicial
-  initReveal();
+  document.addEventListener('animations:ready', () => {
+    console.log('Reveal recibió animations:ready');
+    initReveal();
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    console.log('Reveal recibió astro:page-load');
+    initReveal();
+  });
 </script>

@@ -1,0 +1,143 @@
+---
+interface Props {
+  imgFront: string;
+  imgBack: string;
+  class?: string;
+}
+const { imgFront, imgBack, class: className = '' } = Astro.props;
+---
+
+<div class="shatter-container ${className}">
+  {/* La foto inferior que se revela */}
+  <img src={imgBack} alt="Foto oculta" class="shatter-base-img" />
+  
+  {/* La cuadrícula superior construida con imágenes reales */}
+  <div class="shatter-grid">
+    {Array.from({ length: 16 }).map((_, i) => (
+      <div class="shatter-fragment">
+        <img src={imgFront} alt="Fragmento" class="fragment-img" />
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  function initShatter() {
+    const containers = document.querySelectorAll<HTMLElement>('.shatter-container:not([data-shatter])');
+    
+    containers.forEach(container => {
+      container.dataset.shatter = '1';
+      const grid = container.querySelector('.shatter-grid') as HTMLElement;
+      if (!grid) return;
+      const fragments = grid.querySelectorAll('.shatter-fragment');
+      if (fragments.length === 0) return;
+
+      const gsap = (window as any).gsap;
+      if (!gsap) return;
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Efecto de explosión 3D
+      tl.to(fragments, {
+        x: () => (Math.random() - 0.5) * 300, 
+        y: () => (Math.random() - 0.5) * 200, 
+        z: () => (Math.random() - 0.5) * 200, 
+        rotationX: () => Math.random() * 720 - 360, 
+        rotationY: () => Math.random() * 720 - 360,
+        rotationZ: () => Math.random() * 180 - 90,
+        opacity: 0,
+        scale: 0.1,
+        stagger: {
+          each: 0.02,
+          from: "random" 
+        },
+        ease: "power4.in",
+        duration: 0.9
+      });
+
+      container.addEventListener('mouseenter', () => tl.play());
+      container.addEventListener('mouseleave', () => tl.reverse());
+    });
+  }
+
+  document.addEventListener('animations:ready', initShatter);
+  document.addEventListener('astro:page-load', initShatter);
+</script>
+
+<style>
+  .shatter-container {
+    position: relative;
+    width: 100%;
+    height: 100%; 
+    border-radius: 4px;
+    overflow: hidden; 
+    cursor: pointer;
+    transform-style: preserve-3d;
+    perspective: 1200px;
+  }
+
+  .shatter-base-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    z-index: 1;
+  }
+
+  .shatter-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    z-index: 2;
+    transform-style: preserve-3d;
+    height: 100%; /* FORZAR ALTURA */
+  }
+
+  .shatter-fragment {
+    overflow: hidden; /* El recorte ahora lo hace el div, no el CSS de fondo */
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  /* La imagen real. Se hace 4 veces más grande (400%) y se mueve con CSS */
+  .fragment-img {
+    position: absolute; /* Se sale del flujo para no deformar la cuadrícula */
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 400%;
+    object-fit: cover; /* Se ajusta al contenedor sin deformarse */
+    pointer-events: none; /* Evita que el ratón choque con la imagen en lugar del contenedor */
+    --col: 0; --row: 0;
+    transform: translate(
+      calc(var(--col) * -100%),
+      calc(var(--row) * -100%)
+    );
+  }
+
+  /* Asignación dinámica de las posiciones para cada uno de los 16 fragmentos */
+  .shatter-fragment:nth-child(1)  .fragment-img { --col: 0; --row: 0; }
+  .shatter-fragment:nth-child(2)  .fragment-img { --col: 1; --row: 0; }
+  .shatter-fragment:nth-child(3)  .fragment-img { --col: 2; --row: 0; }
+  .shatter-fragment:nth-child(4)  .fragment-img { --col: 3; --row: 0; }
+  
+  .shatter-fragment:nth-child(5)  .fragment-img { --col: 0; --row: 1; }
+  .shatter-fragment:nth-child(6)  .fragment-img { --col: 1; --row: 1; }
+  .shatter-fragment:nth-child(7)  .fragment-img { --col: 2; --row: 1; }
+  .shatter-fragment:nth-child(8)  .fragment-img { --col: 3; --row: 1; }
+
+  .shatter-fragment:nth-child(9)  .fragment-img { --col: 0; --row: 2; }
+  .shatter-fragment:nth-child(10) .fragment-img { --col: 1; --row: 2; }
+  .shatter-fragment:nth-child(11) .fragment-img { --col: 2; --row: 2; }
+  .shatter-fragment:nth-child(12) .fragment-img { --col: 3; --row: 2; }
+
+  .shatter-fragment:nth-child(13) .fragment-img { --col: 0; --row: 3; }
+  .shatter-fragment:nth-child(14) .fragment-img { --col: 1; --row: 3; }
+  .shatter-fragment:nth-child(15) .fragment-img { --col: 2; --row: 3; }
+  .shatter-fragment:nth-child(16) .fragment-img { --col: 3; --row: 3; }
+</style>

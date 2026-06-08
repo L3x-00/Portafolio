@@ -1,15 +1,16 @@
 ---
 import SectionTitle from '../ui/SectionTitle.astro';
 import RevealText from '../animations/RevealText.astro';
-import ParallaxImage from '../animations/ParallaxImage.astro';
+import PhotoShatter from '../animations/PhotoShatter.astro';
 ---
 
 <section id="sobre-mi" class="about section-pad">
   <div class="about-inner container">
     <div class="about-image">
-      <ParallaxImage
-        src="/images/alex.png"
-        alt="Foto de perfil"
+      {/* Corregido: Quitada la coma mal ubicada después de .png */}
+      <PhotoShatter 
+        imgFront="/images/alex.png"  
+        imgBack="/images/alex2.png"   
       />
       <div class="about-image__tag">
         <span class="about-image__tag-dot"></span>
@@ -67,7 +68,15 @@ import ParallaxImage from '../animations/ParallaxImage.astro';
     .about-image { order: -1; max-width: 380px; margin: 0 auto; width: 100%; }
   }
 
-  .about-image { position: relative; border-radius: 4px; }
+  /* Importante: overflow visible para que los fragmentos 3D salgan del recuadro al caer */
+  .about-image { 
+    position: relative; 
+    border-radius: 4px;
+    /* Forzamos una altura fija de retrato (ajusta esto si tu foto es cuadrada) */
+    aspect-ratio: 3 / 4; 
+    width: 100%;
+  }
+
   .about-image__tag {
     position: absolute;
     bottom: 1.5rem;
@@ -83,6 +92,7 @@ import ParallaxImage from '../animations/ParallaxImage.astro';
     align-items: center;
     gap: 0.5rem;
     backdrop-filter: blur(10px);
+    z-index: 10; /* Asegura que la etiqueta quede por encima de los fragmentos */
   }
   .about-image__tag-dot {
     width: 8px; height: 8px;
@@ -101,7 +111,7 @@ import ParallaxImage from '../animations/ParallaxImage.astro';
     color: var(--color-muted);
     line-height: 1.8;
   }
-  .about-p em { color: var(--color-text); font-style: normal; }
+  .about-p strong { color: var(--color-text); font-weight: 600; }
 
   .about-stats {
     display: flex;
