@@ -24,9 +24,26 @@ const categories = [
             <!-- Nueva cabecera para alinear título y botón -->
             <div class="stack-cat-header">
               <h3 class="stack-cat-title">{cat.title}</h3>
-              <button class="stack-cat-toggle" data-state="closed">Ver todo</button>
+              <button class="stack-cat-toggle" data-state="closed">
+                Ver todo
+              </button>
             </div>
-            
+
+            <div class="stack-preview">
+              {items.slice(0, 4).map((item) => (
+                <div class="stack-preview-item" style={`--item-color: ${item.color}`} >
+                  <img src={item.icon} alt={item.name} />
+                  <span>{item.name}</span>
+                </div>
+              ))}
+
+              {items.length > 4 && (
+                <div class="stack-preview-more">
+                  +{items.length - 4}
+                </div>
+              )}
+            </div>
+
             <div class="stack-cat-grid">
               {items.map((item) => (
                 <div class="stack-item-card" style={`--item-color: ${item.color}`}>
@@ -48,70 +65,173 @@ const categories = [
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
   gsap.registerPlugin(ScrollTrigger);
 
   function initStackMagic() {
 
-  document
-    .querySelectorAll('.stack-category-col')
-    .forEach(el => el.removeAttribute('data-animated'));
+    document
+      .querySelectorAll<HTMLElement>('.stack-category-col')
+      .forEach((col) => {
 
-  document.querySelectorAll<HTMLElement>('.stack-category-col:not([data-animated])').forEach((col) => {
-      col.dataset.animated = '1';
+        const preview = col.querySelector<HTMLElement>('.stack-preview');
+        const grid = col.querySelector<HTMLElement>('.stack-cat-grid');
+        const toggleBtn = col.querySelector<HTMLButtonElement>('.stack-cat-toggle');
 
-      const grid = col.querySelector<HTMLElement>('.stack-cat-grid');
-      const toggleBtn = col.querySelector<HTMLButtonElement>('.stack-cat-toggle');
-      if (!grid || !toggleBtn) return;
+        if (!preview || !grid || !toggleBtn) return;
 
-      const cards = Array.from(grid.querySelectorAll<HTMLElement>('.stack-item-card'));
-      if (cards.length === 0) return;
+        if (col.dataset.initialized === 'true') return;
+        col.dataset.initialized = 'true';
 
-      // Estado inicial (seguro porque scroll está en 0)
-      gsap.set(grid, { height: 0, overflow: 'hidden', opacity: 0 });
-      gsap.set(cards, {
-        scale: 2.2,
-        x: () => (Math.random() - 0.5) * 80,
-        y: () => (Math.random() - 0.5) * 60,
-        rotation: () => (Math.random() - 0.5) * 25,
-        opacity: 0,
+        const cards = Array.from(
+          grid.querySelectorAll<HTMLElement>('.stack-item-card')
+        );
+
+        gsap.set(col, {
+          y: 60,
+          opacity: 0
+        });
+
+        gsap.set(toggleBtn, {
+          opacity: 0,
+          visibility: 'hidden'
+        });
+
+        gsap.set(grid, {
+          opacity: 1,
+          display: 'grid'
+        });
+
+        const tl = gsap.timeline({
+          paused: true
+        });
+
+        tl.to(col, {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out'
+        });
+
+        tl.from(cards, {
+          scale: 0.7,
+          y: 30,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.04,
+          ease: 'power3.out'
+        }, '-=0.4');
+
+        tl.to(toggleBtn, {
+          opacity: 1,
+          visibility: 'visible',
+          duration: 0.3
+        }, '-=0.3');
+
+        tl.to({}, {
+          duration: 2
+        });
+
+        tl.to(grid, {
+          opacity: 0,
+          y: -20,
+          duration: 0.6,
+          ease: 'power2.inOut',
+          onComplete: () => {
+            grid.style.display = 'none';
+          }
+        });
+
+        tl.to(preview, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: 'power2.out'
+        }, '-=0.2');
+
+        ScrollTrigger.create({
+          trigger: col,
+          start: 'top 85%',
+
+          onEnter: () => {
+
+            toggleBtn.dataset.state = 'closed';
+            toggleBtn.textContent = 'Ver todo';
+
+            gsap.set(preview, {
+              opacity: 0,
+              y: 20
+            });
+
+            gsap.set(grid, {
+              display: 'grid',
+              opacity: 1,
+              y: 0
+            });
+
+            tl.restart();
+          }
+        });
+
+        gsap.set(preview, {
+          opacity: 0,
+          y: 20
+        });
+
+        toggleBtn.addEventListener('click', () => {
+
+          const isOpen = toggleBtn.dataset.state === 'open';
+
+          if (!isOpen) {
+
+            grid.style.display = 'grid';
+
+            gsap.fromTo(
+              grid,
+              {
+                opacity: 0,
+                y: -20
+              },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.5,
+                ease: 'power2.out'
+              }
+            );
+
+            gsap.to(preview, {
+              opacity: 0,
+              y: -10,
+              duration: 0.3
+            });
+
+            toggleBtn.textContent = 'Cerrar';
+            toggleBtn.dataset.state = 'open';
+
+          } else {
+
+            gsap.to(grid, {
+              opacity: 0,
+              y: -20,
+              duration: 0.4,
+              onComplete: () => {
+                grid.style.display = 'none';
+              }
+            });
+
+            gsap.to(preview, {
+              opacity: 1,
+              y: 0,
+              duration: 0.4
+            });
+
+            toggleBtn.textContent = 'Ver todo';
+            toggleBtn.dataset.state = 'closed';
+          }
+        });
       });
-
-      const tl = gsap.timeline({ paused: true });
-
-      tl.to(cards, {
-        scale: 1, x: 0, y: 0, rotation: 0, opacity: 1,
-        duration: 1.4,
-        stagger: { each: 0.015, from: 'random' },
-        ease: 'power4.out',
-      })
-      .to({}, { duration: 0.3 })
-      .to(grid, { height: 0, opacity: 0, duration: 0.6, ease: 'power2.inOut' }, '-=0.1')
-      .to(toggleBtn, { opacity: 1, visibility: 'visible', duration: 0.3 }, '<');
-
-      // ScrollTrigger dispara el timeline al entrar en viewport.
-      // Con ScrollTrigger.refresh(true) de Layout, si ya está en viewport
-      // al restaurar scroll, onEnter se llama de inmediato.
-      ScrollTrigger.create({
-        trigger: col,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => tl.play(),
-      });
-
-      // Lógica del botón toggle
-      toggleBtn.addEventListener('click', () => {
-        const isOpen = toggleBtn.dataset.state === 'open';
-        if (isOpen) {
-          gsap.to(grid, { height: 0, opacity: 0, duration: 0.6, ease: 'power2.inOut' });
-          toggleBtn.textContent = 'Ver todo';
-          toggleBtn.dataset.state = 'closed';
-        } else {
-          gsap.to(grid, { height: 'auto', opacity: 1, duration: 0.6, ease: 'power2.inOut' });
-          toggleBtn.textContent = 'Cerrar';
-          toggleBtn.dataset.state = 'open';
-        }
-      });
-    });
   }
-document.addEventListener('animations:ready', initStackMagic);
+
+  document.addEventListener('animations:ready', initStackMagic);
 </script>

@@ -4,6 +4,7 @@ interface Props {
   title: string;
   align?: 'left' | 'center';
 }
+
 const { label, title, align = 'left' } = Astro.props;
 ---
 
@@ -18,27 +19,54 @@ const { label, title, align = 'left' } = Astro.props;
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   gsap.registerPlugin(ScrollTrigger);
 
-  function initTitles() {
-    document.querySelectorAll<HTMLElement>('.section-title:not([data-st])').forEach((el) => {
-      el.dataset.st = '1';
-      
-      gsap.from(el, {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 90%',
-          end: 'bottom 20%',    // Mantén el título visible mucho más tiempo
-          toggleActions: "play reverse play reverse",
+  function initReveal() {
+    document.querySelectorAll('.reveal-host:not([data-rv])').forEach((el) => {
+      (el as HTMLElement).dataset.rv = '1';
+
+      const inner = el.firstElementChild;
+      if (!inner) return;
+
+      // estado inicial visible
+      gsap.set(inner, {
+        opacity: 1,
+        y: 0
+      });
+
+      ScrollTrigger.create({
+        trigger: el,
+
+        start: 'top 95%',
+        end: 'bottom 5%',
+
+        // 🔥 IMPORTANTE: estado inicial fijo
+        onRefresh: self => {
+          if (self.isActive) {
+            gsap.set(inner, { opacity: 1, y: 0 });
+          }
         },
+
+        onLeaveBack: () => {
+          gsap.to(inner, {
+            opacity: 0,
+            y: -15,
+            duration: 0.4,
+            ease: 'power2.in'
+          });
+        },
+
+        onEnter: () => {
+          gsap.to(inner, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: 'power2.out'
+          });
+        }
       });
     });
   }
 
-  document.addEventListener('animations:ready', initTitles);
-  document.addEventListener('astro:page-load', initTitles);
+  document.addEventListener('animations:ready', initReveal);
 </script>
 
 <style>

@@ -69,11 +69,10 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
   }
 
   /* Importante: overflow visible para que los fragmentos 3D salgan del recuadro al caer */
-  .about-image { 
+    .about-image { 
     position: relative; 
     border-radius: 4px;
-    /* Forzamos una altura fija de retrato (ajusta esto si tu foto es cuadrada) */
-    aspect-ratio: 3 / 4; 
+    aspect-ratio: 3 / 4; /* Si no tienes esta línea, añádela */
     width: 100%;
   }
 

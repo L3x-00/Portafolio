@@ -4,28 +4,28 @@ import RevealText from '../animations/RevealText.astro';
 
 const steps = [
   {
-    num:   '01',
+    num: '01',
     title: 'Descubrimiento',
-    desc:  'Entiendo el negocio, al usuario y los objetivos antes de escribir una sola línea de código.',
-    icon:  '🔍',
+    desc: 'Entiendo el negocio, al usuario y los objetivos antes de escribir una sola línea de código.',
+    icon: '/GIF/Descubrimiento.gif',
   },
   {
-    num:   '02',
+    num: '02',
     title: 'Diseño & Sistema',
-    desc:  'Creo el sistema de diseño, componentes y la arquitectura visual en Figma con tokens definidos.',
-    icon:  '🎨',
+    desc: 'Creo el sistema de diseño, componentes y la arquitectura visual en Figma con tokens definidos.',
+    icon: '/GIF/diseño.gif',
   },
   {
-    num:   '03',
+    num: '03',
     title: 'Desarrollo',
-    desc:  'Código limpio, tipado y accesible. Cada animación tiene propósito y cada byte está optimizado.',
-    icon:  '⚡',
+    desc: 'Código limpio, tipado y accesible. Cada animación tiene propósito y cada byte está optimizado.',
+    icon: '/GIF/desarrollo.gif',
   },
   {
-    num:   '04',
+    num: '04',
     title: 'Lanzamiento',
-    desc:  'Deploy en edge networks, tests de performance y soporte post-lanzamiento para que todo vuele.',
-    icon:  '🚀',
+    desc: 'Deploy en edge networks, tests de performance y soporte post-lanzamiento para que todo vuele.',
+    icon: '/GIF/lanzamiento.gif',
   },
 ];
 ---
@@ -40,7 +40,11 @@ const steps = [
           <div class="process-step">
             <div class="process-step__header">
               <span class="process-step__num">{step.num}</span>
-              <span class="process-step__icon">{step.icon}</span>
+              <img
+                class="process-step__icon"
+                src={step.icon}
+                alt={step.title}
+              />
             </div>
             <h3 class="process-step__title">{step.title}</h3>
             <p class="process-step__desc">{step.desc}</p>
@@ -86,7 +90,17 @@ const steps = [
     letter-spacing: 0.1em;
     color: var(--color-accent);
   }
-  .process-step__icon { font-size: 1.5rem; }
+  .process-step__icon {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  background: transparent;
+  display: block;
+  }
+
+.process-step:hover .process-step__icon {
+  transform: scale(1.1);
+}
 
   .process-step__title {
     font-size: 1.125rem;
@@ -110,4 +124,4 @@ const steps = [
     z-index: 1;
   }
   @media (max-width: 768px) { .process-step__connector { display: none; } }
-</style>src/components/sections/Contact.astro
+</style>

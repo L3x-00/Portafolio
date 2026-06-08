@@ -15,29 +15,27 @@ const {
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <style>
+  html,
+  body {
+    background: #050505;
+    margin: 0;
+    padding: 0;
+  }
+</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#050505" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="www.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 
-    <!--
-      is:inline = corre SINCRÓNICAMENTE antes de que el navegador procese
-      la restauración de scroll. Evita el bug del F5.
-    -->
-    <script is:inline>
-      if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'manual';
-      }
-    </script>
-
-    <ClientRouter />
+    {/* CAMBIO 1: BORRAR este bloque completo. Esto confunde al navegador al hacer F5 */}
   </head>
   <body>
     <slot />
@@ -60,7 +58,7 @@ const {
     let currentSection = '';
     
     sections.forEach(section => {
-      const sectionTop = (section as HTMLElement).offsetTop - 150; // Offset para compensar el Navbar
+      const sectionTop = (section as HTMLElement).offsetTop - 150;
       if (window.scrollY >= sectionTop) {
         currentSection = section.getAttribute('id') || '';
       }
@@ -98,7 +96,7 @@ const {
     
     lenis.on('scroll', () => {
       ScrollTrigger.update();
-      updateUrlHash(); // Actualiza la URL mientras se hace scroll
+      updateUrlHash();
     });
 
     _lenisTicker = (time: number) => lenis.raf(time * 1000);
@@ -114,25 +112,28 @@ const {
           const targetElement = document.querySelector(targetId as string);
           if (targetElement) {
             lenis.scrollTo(targetElement as HTMLElement, { 
-              offset: -80, // Se detiene 80px arriba para no taparlo con el Navbar
+              offset: -80,
               immediate: false 
             });
           }
         }
       });
     });
-    console.log('Layout envía animations:ready');
-    // --- DESPACHAR EVENTO Y REFRESH ---
-    Promise.resolve().then(() => {
+
+    // CAMBIO 2: Arreglar el timing. En lugar de un Promise.resolve (que falla con Vite),
+    // usamos un setTimeout de 0ms. Esto obliga a esperar a que Vite termine de inyectar 
+    // todos los componentes en la página ANTES de dar la orden de animar.
+    setTimeout(() => {
       document.dispatchEvent(new CustomEvent('animations:ready', { detail: { reduced: false } }));
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          ScrollTrigger.refresh(true);
-          updateUrlHash(); // Actualizar URL si se hizo F5 a mitad de página
+          ScrollTrigger.refresh();
+          
+          updateUrlHash();
         });
       });
-    });
+    }, 0);
   }
 
   // Carga inicial

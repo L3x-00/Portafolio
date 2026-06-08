@@ -25,7 +25,7 @@ export default function Scene() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(ellipse at 50% 50%, #0a1628 0%, #050505 100%)',
+          background: '#050505'
         }}
       />
     );
