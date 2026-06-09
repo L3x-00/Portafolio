@@ -15,27 +15,20 @@ const {
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <style>
-  html,
-  body {
-    background: #050505;
-    margin: 0;
-    padding: 0;
-  }
-</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#050505" />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>html,body{background:#050505;margin:0;padding:0;}</style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="www.gstatic.com" crossorigin />
+    <!-- ✅ FIX Bug 5: era 'www.gstatic.com' sin https, las fuentes no precargaban -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-
-    {/* CAMBIO 1: BORRAR este bloque completo. Esto confunde al navegador al hacer F5 */}
+    <ClientRouter />
   </head>
   <body>
     <slot />
@@ -52,27 +45,24 @@ const {
 
   let _lenisTicker: ((time: number) => void) | null = null;
 
-  // Función para actualizar la URL sin recargar (Scroll Spy)
   function updateUrlHash() {
     const sections = document.querySelectorAll('section[id]');
     let currentSection = '';
-    
     sections.forEach(section => {
       const sectionTop = (section as HTMLElement).offsetTop - 150;
       if (window.scrollY >= sectionTop) {
         currentSection = section.getAttribute('id') || '';
       }
     });
-
     if (currentSection && window.location.hash !== `#${currentSection}`) {
       history.replaceState(null, '', `#${currentSection}`);
     } else if (!currentSection && window.location.hash !== '') {
       history.replaceState(null, '', window.location.pathname);
     }
   }
-  
+
   function setupScroll() {
-    // --- LIMPIEZA ---
+    // Limpieza de instancia anterior
     if (_lenisTicker) {
       gsap.ticker.remove(_lenisTicker);
       _lenisTicker = null;
@@ -81,7 +71,14 @@ const {
     if (prevLenis) prevLenis.destroy();
     ScrollTrigger.getAll().forEach((t) => t.kill());
 
-    // --- PREFERS-REDUCED-MOTION ---
+    // Limpiar guardas de animaciones para que se reinicialicen en navegación
+    document.querySelectorAll('[data-rtext],[data-sg],[data-animated],[data-px]').forEach(el => {
+      (el as HTMLElement).removeAttribute('data-rtext');
+      (el as HTMLElement).removeAttribute('data-sg');
+      (el as HTMLElement).removeAttribute('data-animated');
+      (el as HTMLElement).removeAttribute('data-px');
+    });
+
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       gsap.globalTimeline.timeScale(1);
@@ -91,9 +88,8 @@ const {
       return;
     }
 
-    // --- INICIALIZAR LENIS ---
     const lenis = new Lenis({ autoRaf: false });
-    
+
     lenis.on('scroll', () => {
       ScrollTrigger.update();
       updateUrlHash();
@@ -103,7 +99,6 @@ const {
     gsap.ticker.add(_lenisTicker);
     (window as any).__lenis = lenis;
 
-    // --- INTERCEPTAR CLICKS DEL MENÚ ---
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', (e) => {
         const targetId = anchor.getAttribute('href');
@@ -111,34 +106,27 @@ const {
           e.preventDefault();
           const targetElement = document.querySelector(targetId as string);
           if (targetElement) {
-            lenis.scrollTo(targetElement as HTMLElement, { 
-              offset: -80,
-              immediate: false 
-            });
+            lenis.scrollTo(targetElement as HTMLElement, { offset: -80, immediate: false });
           }
         }
       });
     });
 
-    // CAMBIO 2: Arreglar el timing. En lugar de un Promise.resolve (que falla con Vite),
-    // usamos un setTimeout de 0ms. Esto obliga a esperar a que Vite termine de inyectar 
-    // todos los componentes en la página ANTES de dar la orden de animar.
-    setTimeout(() => {
+    // ✅ FIX Bug 4: Promise.resolve garantiza que todos los scripts de componentes
+    // ya registraron sus listeners ANTES de que disparemos 'animations:ready'.
+    // Se eliminó setupScroll() inicial — astro:page-load ya cubre la carga inicial en Astro 6.
+    Promise.resolve().then(() => {
       document.dispatchEvent(new CustomEvent('animations:ready', { detail: { reduced: false } }));
-
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           ScrollTrigger.refresh();
-          
           updateUrlHash();
         });
       });
-    }, 0);
+    });
   }
 
-  // Carga inicial
-  setupScroll();
-
-  // Astro View Transitions: re-inicializar en cada navegación interna
+  // ✅ FIX Bug 4: En Astro 6 con <ClientRouter />, 'astro:page-load' se dispara
+  // en la carga inicial Y en cada navegación. Ya no necesitamos llamar setupScroll() manualmente.
   document.addEventListener('astro:page-load', setupScroll);
 </script>

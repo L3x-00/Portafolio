@@ -185,7 +185,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-display); }
 }
 /* Cuadrícula interna (Sin transiciones CSS, GSAP lo controla todo) */
 .stack-cat-grid {
-  display: none;
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }

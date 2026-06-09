@@ -4,7 +4,6 @@ interface Props {
   title: string;
   align?: 'left' | 'center';
 }
-
 const { label, title, align = 'left' } = Astro.props;
 ---
 
@@ -14,72 +13,12 @@ const { label, title, align = 'left' } = Astro.props;
   <div class="section-title__line"></div>
 </div>
 
-<script>
-  import { gsap } from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-  gsap.registerPlugin(ScrollTrigger);
-
-  function initReveal() {
-    document.querySelectorAll('.reveal-host:not([data-rv])').forEach((el) => {
-      (el as HTMLElement).dataset.rv = '1';
-
-      const inner = el.firstElementChild;
-      if (!inner) return;
-
-      // estado inicial visible
-      gsap.set(inner, {
-        opacity: 1,
-        y: 0
-      });
-
-      ScrollTrigger.create({
-        trigger: el,
-
-        start: 'top 95%',
-        end: 'bottom 5%',
-
-        // 🔥 IMPORTANTE: estado inicial fijo
-        onRefresh: self => {
-          if (self.isActive) {
-            gsap.set(inner, { opacity: 1, y: 0 });
-          }
-        },
-
-        onLeaveBack: () => {
-          gsap.to(inner, {
-            opacity: 0,
-            y: -15,
-            duration: 0.4,
-            ease: 'power2.in'
-          });
-        },
-
-        onEnter: () => {
-          gsap.to(inner, {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: 'power2.out'
-          });
-        }
-      });
-    });
-  }
-
-  document.addEventListener('animations:ready', initReveal);
-</script>
+<!-- ✅ FIX Bug 6: Eliminado el script que buscaba '.reveal-host' (clase que ya no existe).
+     SectionTitle es HTML puro. Sus animaciones las maneja RevealText cuando se envuelve en él. -->
 
 <style>
-  .section-title { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 0.75rem; 
-  }
-  
-  .section-title--center { 
-    align-items: center; 
-    text-align: center; 
-  }
+  .section-title { display: flex; flex-direction: column; gap: 0.75rem; }
+  .section-title--center { align-items: center; text-align: center; }
 
   .section-title__label {
     font-family: var(--font-mono);
@@ -104,8 +43,5 @@ const { label, title, align = 'left' } = Astro.props;
     height: 1px;
     background: linear-gradient(90deg, var(--color-accent), transparent);
   }
-  
-  .section-title--center .section-title__line { 
-    margin: 0 auto; 
-  }
+  .section-title--center .section-title__line { margin: 0 auto; }
 </style>
