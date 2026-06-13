@@ -45,6 +45,7 @@ import PhotoShatter from '../animations/PhotoShatter';
           { n: 'Fullstack', label: 'Backend + Frontend' },
           { n: 'Mobile',    label: 'Apps Nativas' },
           { n: 'Creativo',  label: 'Diseño + IA' },
+          { n: 'Cloud & DevOps', label: 'Despliegue + Infraestructura' },
         ].map(s => (
           <div class="about-stat">
             <span class="about-stat__n">{s.n}</span>
@@ -73,9 +74,11 @@ import PhotoShatter from '../animations/PhotoShatter';
 
   .about-image {
     position: relative;
-    /* ✅ FIX: sin border-radius aquí, PhotoShatter maneja el suyo */
     aspect-ratio: 3 / 4;
     width: 100%;
+    max-width: 425px; /* 👈 Evita que crezca demasiado horizontalmente */
+    max-height: 90vh; /* 👈 Evita que sobrepase la pantalla verticalmente */
+    margin: 0 auto; /* 👈 La centra en su columna */
   }
 
   /* La etiqueta queda por encima del canvas 3D */

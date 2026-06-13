@@ -248,18 +248,20 @@ export default function PhotoShatter({
         </div>
       </div>
 
-      <style>{`
+            <style>{`
+        /* Outer shell: SIN BORDES, SIN RECORTE */
         .ps-outer {
           width: 100%;
           height: 100%;
-          padding: 1.5px;
-          border-radius: 22px;
-          background: linear-gradient(145deg, rgba(0,240,255,0.38) 0%, rgba(191,0,255,0.24) 38%, rgba(0,240,255,0.12) 65%, rgba(191,0,255,0.32) 100%);
-          transition: background 0.5s ease;
+          border-radius: 0; /* Quitamos el borde redondeado que causa la línea */
+          background: #050505; /* Mismo color que el fondo de tu web */
+          overflow: visible; /* Permite que el degradado se funda hacia afuera */
         }
         .ps-outer:hover {
-          background: linear-gradient(145deg, rgba(0,240,255,0.62) 0%, rgba(191,0,255,0.46) 38%, rgba(0,240,255,0.24) 65%, rgba(191,0,255,0.58) 100%);
+          background: #050505; /* Mantenemos el fondo oscuro al hacer hover */
         }
+
+        /* Inner canvas */
         .ps-canvas {
           position: relative;
           width: 100%;
@@ -269,6 +271,8 @@ export default function PhotoShatter({
           cursor: crosshair;
           background: #050505;
         }
+
+        /* Back photo */
         .ps-back {
           position: absolute;
           inset: 0;
@@ -280,6 +284,8 @@ export default function PhotoShatter({
           pointer-events: none;
           user-select: none;
         }
+
+        /* Each triangular fragment tile */
         .ps-frag {
           position: absolute;
           inset: 0;
@@ -290,14 +296,37 @@ export default function PhotoShatter({
           will-change: transform, opacity;
           pointer-events: none;
         }
+
+                /* ━━━ MÁSCARA DE DEGRADADO EN TODOS LOS BORDES ━━━ */
+        .ps-back,
+        .ps-frag {
+          /* Superponemos 4 degradados: arriba, derecha, abajo, izquierda */
+          -webkit-mask-image: 
+            linear-gradient(to bottom, transparent 0%, black 7%, black 95%, transparent 100%),
+            linear-gradient(to right, transparent 0%, black 7%, black 95%, transparent 100%),
+            linear-gradient(to bottom, black 0%, black 100%),
+            linear-gradient(to right, black 0%, black 100%);
+          mask-image: 
+            linear-gradient(to bottom, transparent 0%, black 7%, black 95%, transparent 100%),
+            linear-gradient(to right, transparent 0%, black 7%, black 95%, transparent 100%),
+            linear-gradient(to bottom, black 0%, black 100%),
+            linear-gradient(to right, black 0%, black 100%);
+            
+          -webkit-mask-composite: intersect;
+          mask-composite: intersect;
+        }
+
+        /* Vignette clásico eliminado, la máscara hace el trabajo */
         .ps-vignette {
           position: absolute;
           inset: 0;
           border-radius: 20px;
           pointer-events: none;
           z-index: 10;
-          background: radial-gradient(ellipse 88% 91% at 50% 43%, transparent 50%, rgba(5,5,5,0.17) 66%, rgba(5,5,5,0.52) 83%, rgba(5,5,5,0.88) 100%);
+          background: none; /* Lo quitamos porque el mask-image ya difumina los bordes */
         }
+
+        /* Subtle hover hint */
         .ps-hint {
           position: absolute;
           bottom: 4rem;
@@ -314,8 +343,8 @@ export default function PhotoShatter({
           font-size: 0.6rem;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: rgba(0,240,255,0.5);
-          border: 1px solid rgba(0,240,255,0.2);
+          color: rgba(0, 240, 255, 0.5);
+          border: 1px solid rgba(0, 240, 255, 0.2);
           padding: 0.25rem 0.7rem;
           border-radius: 100px;
           backdrop-filter: blur(4px);
