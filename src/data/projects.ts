@@ -5,7 +5,7 @@ export const projects: Project[] = [
     slug:    'policlinico-san-pedro',
     title:   'Policlínico San Pedro',
     year:    '2025',
-    tags:    ['Laravel', 'PHP', 'JavaScript', 'Bootstrap', 'Blade', 'MySQL'],
+    tags:    ['Laravel', 'PHP', 'JavaScript', 'Css', 'Bootstrap', 'Blade', 'MySQL'],
     description:'Sistema web multiplataforma integral para la gestión automatizada de pacientes, programación de citas en tiempo real e historias clínicas ambulatorias.',
     longDesc: 'Una plataforma médica digital diseñada para optimizar los flujos de trabajo clínicos y administrativos. El sistema centraliza la gestión del paciente desde el triaje automático hasta la consulta médica mediante fichas digitales interactivas que replican historias clínicas físicas. Incluye un módulo de analítica visual con gráficos interactivos dinámicos de atención diaria y comparativa de rendimiento, un motor de reserva y reprogramación de citas desacoplado mediante JavaScript/AJAX para mejorar la experiencia de usuario (UX), y un formato estandarizado y optimizado para impresión de reportes médicos.',
     image: '/images/sanpedro.jpg', // Imagen profesional de clínica/hospital

@@ -56,6 +56,7 @@ const steps = [
               </div>
             </RevealText>
 
+            {/* Nodos y línea (solo visibles en escritorio) */}
             <div class="timeline-node" aria-hidden="true">
               <span class="timeline-line"></span>
               <span class="timeline-dot"></span>
@@ -63,7 +64,7 @@ const steps = [
           </div>
         ))}
         
-        {/* El cohete que viaja por la línea */}
+        {/* El cohete (solo visible en escritorio) */}
         <div class="rocket-ship" id="process-rocket">🚀</div>
       </div>
     </div>
@@ -80,246 +81,250 @@ const steps = [
     const rocket = document.getElementById('process-rocket');
     const cards = document.querySelectorAll<HTMLElement>('[data-step]');
     
-    if (!timeline || !rocket || !cards.length) return;
+    if (!timeline || !cards.length) return;
 
-    // 1. Animación del Cohete
-    const rocketTween = gsap.fromTo(rocket, 
-      { xPercent: 0, scale: 1 }, 
-      {
-        xPercent: 100, 
-        scale: 1.2,
-        ease: "none",
-        scrollTrigger: {
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+
+    // ── LÓGICA SOLO PARA ESCRITORIO (Línea y Cohete) ──
+    if (isDesktop && rocket) {
+      // 1. Animación del Cohete
+      gsap.fromTo(rocket, 
+        { xPercent: 0, scale: 1 }, 
+        {
+          xPercent: 100, 
+          scale: 1.2,
+          ease: "none",
+          scrollTrigger: {
+            trigger: timeline,
+            start: "top 80%",
+            end: "bottom 50%",
+            scrub: 1.5,
+          }
+        }
+      );
+
+      // 2. Encendido de tarjetas al pasar el cohete
+      cards.forEach((card, index) => {
+        const triggerPosition = index / (cards.length - 1); 
+        
+        ScrollTrigger.create({
           trigger: timeline,
           start: "top 80%",
           end: "bottom 50%",
-          scrub: 1.5,
-        }
-      }
-    );
-
-    // 2. Encendido de tarjetas al pasar el cohete
-    cards.forEach((card, index) => {
-      const triggerPosition = index / (cards.length - 1); 
-      
-      ScrollTrigger.create({
-        trigger: timeline,
-        start: "top 80%",
-        end: "bottom 50%",
-        onUpdate: (self) => {
-          if (self.progress >= triggerPosition) {
-            card.classList.add('is-active');
-          } else {
-            card.classList.remove('is-active');
+          onUpdate: (self) => {
+            if (self.progress >= triggerPosition) {
+              card.classList.add('is-active');
+            } else {
+              card.classList.remove('is-active');
+            }
           }
-        }
-      });
-    });
-
-    // 3. Efecto 3D Tilt
-    cards.forEach((card) => {
-      if (card.dataset.tiltActive) return;
-      card.dataset.tiltActive = '1';
-
-      card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const tiltX = ((y / rect.height) - 0.5) * -6; 
-        const tiltY = ((x / rect.width) - 0.5) * 6;
-
-        gsap.to(card, {
-          rotateX: tiltX,
-          rotateY: tiltY,
-          duration: 0.3,
-          ease: 'power2.out',
-          transformPerspective: 800,
         });
       });
+    }
 
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          duration: 0.5,
-          ease: 'elastic.out(1, 0.5)', 
+    // ── LÓGICA PARA MÓVIL (Activar al hacer scroll) ──
+    if (!isDesktop) {
+      cards.forEach((card) => {
+        ScrollTrigger.create({
+          trigger: card,
+          start: 'top 85%',
+          once: true,
+          onEnter: () => card.classList.add('is-active'),
         });
       });
-    });
+    }
+
+    // ── Efecto 3D Tilt (Solo escritorio, en móvil no tiene sentido)
+    if (isDesktop) {
+      cards.forEach((card) => {
+        if (card.dataset.tiltActive) return;
+        card.dataset.tiltActive = '1';
+
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          const tiltX = ((y / rect.height) - 0.5) * -6; 
+          const tiltY = ((x / rect.width) - 0.5) * 6;
+
+          gsap.to(card, {
+            rotateX: tiltX,
+            rotateY: tiltY,
+            duration: 0.3,
+            ease: 'power2.out',
+            transformPerspective: 800,
+          });
+        });
+
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, {
+            rotateX: 0,
+            rotateY: 0,
+            duration: 0.5,
+            ease: 'elastic.out(1, 0.5)', 
+          });
+        });
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', initProcessAnimations);
 </script>
+
 <style>
   .section-pad { padding: 7rem 0; }
   .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
-  /* ━━━ CONTENEDOR CON SCROLL ━━━ */
+  /* ━━━ MÓVIL PRIMERO (Grid 2x2) ━━━ */
   .timeline-wrapper {
-    overflow-x: auto;
-    scrollbar-width: none;
-    margin-top: 4rem;
-    padding-bottom: 2rem;
+    margin-top: 3rem;
+    padding-bottom: 0;
+    overflow-x: visible; /* Sin scroll horizontal en móvil */
   }
-  .timeline-wrapper::-webkit-scrollbar { display: none; }
 
-  /* ━━━ LÍNEA DE TIEMPO HORIZONTAL ━━━ */
   .timeline {
-    display: flex;
-    align-items: flex-start;
-    gap: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columnas */
+    gap: 1rem; /* Espacio entre cuadros */
     position: relative;
-    min-width: 900px;
-    padding: 0 1rem;
+    padding: 0;
   }
 
   .timeline-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1;
     position: relative;
   }
 
-  /* ━━━ TARJETA DE FASE ━━━ */
+  /* Ocultar línea y cohete en móvil */
+  .timeline-node, .rocket-ship { display: none; }
+
+  /* Tarjeta móvil */
   .timeline-card {
-    width: 90%;
+    width: 100%;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 16px; 
     position: relative;
     overflow: hidden;
-    transform-style: preserve-3d;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    margin-bottom: 2.5rem;
-    min-height: 230px;
+    min-height: 200px; /* Más compacta */
     display: flex;
     flex-direction: column;
-  }
-
-  .timeline-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(0, 240, 255, 0.2);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .timeline-card.is-active {
-    border-color: rgba(0, 240, 255, 0.5);
-    box-shadow: 
-      0 12px 24px rgba(0, 0, 0, 0.3),
-      0 0 25px rgba(0, 240, 255, 0.1);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
   }
 
-  /* ━━━ FONDO GIF CON OPACIDAD ━━━ */
   .timeline-card__bg {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.15; /* Opacidad baja para que no moleste al leer */
-    transition: opacity 0.3s ease;
-    z-index: 0;
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    opacity: 0.15; z-index: 0;
   }
+  .timeline-card.is-active .timeline-card__bg { opacity: 0.25; }
 
-  .timeline-card:hover .timeline-card__bg,
-  .timeline-card.is-active .timeline-card__bg {
-    opacity: 0.25; /* Sube un poco la opacidad al hacer hover o estar activa */
-  }
-
-  /* ━━━ CONTENIDO POR ENCIMA ━━━ */
   .timeline-card__content {
-    position: relative;
-    z-index: 1;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    position: relative; z-index: 1;
+    padding: 1.25rem; /* Padding más pequeño */
+    display: flex; flex-direction: column; height: 100%;
   }
 
-  /* Cabecera */
   .timeline-card__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;
   }
   .timeline-card__num {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    color: var(--color-accent);
-    background: rgba(0, 240, 255, 0.08);
-    padding: 0.25rem 0.6rem;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 240, 255, 0.15);
+    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em;
+    color: var(--color-accent); background: rgba(0, 240, 255, 0.08);
+    padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(0, 240, 255, 0.15);
   }
-
-  /* Textos */
   .timeline-card__title {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 0.5rem;
+    font-family: var(--font-display); font-size: 1rem; font-weight: 600;
+    color: var(--color-text); margin-bottom: 0.4rem;
   }
   .timeline-card__desc {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    line-height: 1.6;
-    flex: 1;
+    font-size: 0.75rem; color: var(--color-muted); line-height: 1.5; flex: 1;
   }
 
-  /* ━━━ NODO, PUNTO Y LÍNEA ━━━ */
-  .timeline-node {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    position: relative;
-  }
+  /* ━━━ ESCRITORIO (Línea Horizontal) ━━━ */
+  @media (min-width: 768px) {
+    .timeline-wrapper {
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-top: 4rem;
+      padding-bottom: 2rem;
+    }
+    .timeline-wrapper::-webkit-scrollbar { display: none; }
 
-  .timeline-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--color-bg);
-    border: 2px solid var(--color-border);
-    position: relative;
-    z-index: 2;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 0 4px var(--color-bg);
-    flex-shrink: 0;
-  }
+    .timeline {
+      display: flex; /* Volvemos a flex */
+      align-items: flex-start;
+      gap: 0;
+      min-width: 900px;
+      padding: 0 1rem;
+    }
 
-  .timeline-line {
-    flex-grow: 1;
-    height: 2px;
-    background: linear-gradient(90deg, var(--color-border), rgba(0, 240, 255, 0.2));
-  }
+    .timeline-item { flex: 1; }
 
-  .timeline-item:last-child .timeline-line { display: none; }
+    /* Mostrar línea y cohete en escritorio */
+    .timeline-node, .rocket-ship { display: flex; } /* flex para los nodos */
 
-  .timeline-item:hover .timeline-dot,
-  .timeline-card.is-active ~ .timeline-node .timeline-dot {
-    border-color: var(--color-accent);
-    background: var(--color-accent);
-    box-shadow: 0 0 12px var(--color-accent), 0 0 0 4px var(--color-bg);
-  }
+    /* Tarjeta escritorio */
+    .timeline-card {
+      width: 90%; 
+      min-height: 230px;
+      margin-bottom: 2.5rem; 
+      transform-style: preserve-3d;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
 
-  /* ━━━ COHETE ━━━ */
-  .rocket-ship {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
-    font-size: 24px;
-    z-index: 10;
-    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
-    pointer-events: none;
-    transition: bottom 0.3s ease;
-  }
-  
-  .timeline-item:hover .rocket-ship {
-    bottom: 20px; 
+    .timeline-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+    .timeline-card.is-active {
+      border-color: rgba(0, 240, 255, 0.5);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 240, 255, 0.1);
+    }
+    .timeline-card.is-active .timeline-card__bg { opacity: 0.25; }
+
+    .timeline-card__content { padding: 1.5rem; }
+    .timeline-card__num { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+    .timeline-card__title { font-size: 1.1rem; }
+    .timeline-card__desc { font-size: 0.85rem; line-height: 1.6; }
+
+    /* Nodos y Línea */
+    .timeline-node {
+      width: 100%; position: relative; align-items: center;
+    }
+    .timeline-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--color-bg); border: 2px solid var(--color-border);
+      position: relative; z-index: 2; transition: all 0.3s ease;
+      box-shadow: 0 0 0 4px var(--color-bg); flex-shrink: 0;
+    }
+    .timeline-line {
+      flex-grow: 1; height: 2px;
+      background: linear-gradient(90deg, var(--color-border), rgba(0, 240, 255, 0.2));
+    }
+    .timeline-item:last-child .timeline-line { display: none; }
+    .timeline-item:hover .timeline-dot,
+    .timeline-card.is-active ~ .timeline-node .timeline-dot {
+      border-color: var(--color-accent); background: var(--color-accent);
+      box-shadow: 0 0 12px var(--color-accent), 0 0 0 4px var(--color-bg);
+    }
+
+    /* Cohete */
+    .rocket-ship {
+      position: absolute; bottom: 10px; left: 0;
+      font-size: 24px; z-index: 10;
+      filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
+      pointer-events: none; transition: bottom 0.3s ease;
+    }
+    .timeline-item:hover .rocket-ship { bottom: 20px; }
   }
 </style>
