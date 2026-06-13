@@ -15,5 +15,5 @@ export interface StackItem {
   icon: string;
   level: 'Básico' | 'Intermedio' | 'Avanzado' | 'Experto';
   color: string;
-  category: 'Frontend' | 'Backend' | 'Diseño' | 'IA'; // <-- NUEVO
+  category: 'Frontend' | 'Backend' | 'Diseño' | 'IA' | 'Cloud'; // <-- NUEVO
 }

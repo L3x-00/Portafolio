@@ -1,16 +1,19 @@
 ---
 import SectionTitle from '../ui/SectionTitle.astro';
 import RevealText from '../animations/RevealText.astro';
-import PhotoShatter from '../animations/PhotoShatter.astro';
+// ✅ FIX: importar el .tsx React, NO el .astro
+import PhotoShatter from '../animations/PhotoShatter';
 ---
 
 <section id="sobre-mi" class="about section-pad">
   <div class="about-inner container">
     <div class="about-image">
-      {/* Corregido: Quitada la coma mal ubicada después de .png */}
-      <PhotoShatter 
-        imgFront="/images/alex.png"  
-        imgBack="/images/alex2.png"   
+    <!-- ✅ FIX: client:only="react" y 3 imágenes -->
+      <PhotoShatter
+        client:only="react"
+        imgFront="/images/alex.png"
+        imgMid="/images/alex2.png"
+        imgBack="/images/alex3.png"
       />
       <div class="about-image__tag">
         <span class="about-image__tag-dot"></span>
@@ -23,16 +26,16 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
 
       <RevealText delay={0.1}>
         <p class="about-p">
-          Soy un <strong>Desarrollador Fullstack y consultor TI</strong> con una visión integral del producto. 
-          Desarrollo soluciones robustas desde la arquitectura backend hasta experiencias móviles nativas. 
+          Soy un <strong>Desarrollador Fullstack y consultor TI</strong> con una visión integral del producto.
+          Desarrollo soluciones robustas desde la arquitectura backend hasta experiencias móviles nativas.
           Mi enfoque une el rigor del código limpio con la libertad del diseño gráfico y la potencia de la Inteligencia Artificial.
         </p>
       </RevealText>
 
       <RevealText delay={0.2}>
         <p class="about-p">
-          Ya sea escalando marketplaces de alta complejidad, 
-          creando activos visuales con IA o puliendo la UI/UX de una aplicación móvil, 
+          Ya sea escalando marketplaces de alta complejidad,
+          creando activos visuales con IA o puliendo la UI/UX de una aplicación móvil,
           mi objetivo siempre es el mismo: transformar necesidades complejas en tecnología tangible que impacta.
         </p>
       </RevealText>
@@ -54,8 +57,8 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
 </section>
 
 <style>
-  .section-pad  { padding: 7rem 0; }
-  .container    { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+  .section-pad { padding: 7rem 0; }
+  .container   { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
   .about-inner {
     display: grid;
@@ -65,23 +68,23 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
   }
   @media (max-width: 768px) {
     .about-inner { grid-template-columns: 1fr; gap: 3rem; }
-    .about-image { order: -1; max-width: 380px; margin: 0 auto; width: 100%; }
+    .about-image { order: -1; max-width: 360px; margin: 0 auto; width: 100%; }
   }
 
-  /* Importante: overflow visible para que los fragmentos 3D salgan del recuadro al caer */
-    .about-image { 
-    position: relative; 
-    border-radius: 4px;
-    aspect-ratio: 3 / 4; /* Si no tienes esta línea, añádela */
+  .about-image {
+    position: relative;
+    /* ✅ FIX: sin border-radius aquí, PhotoShatter maneja el suyo */
+    aspect-ratio: 3 / 4;
     width: 100%;
   }
 
+  /* La etiqueta queda por encima del canvas 3D */
   .about-image__tag {
     position: absolute;
     bottom: 1.5rem;
     left: 1.5rem;
-    background: rgba(5,5,5,0.9);
-    border: 1px solid rgba(0,240,255,0.3);
+    background: rgba(5, 5, 5, 0.9);
+    border: 1px solid rgba(0, 240, 255, 0.3);
     border-radius: 100px;
     padding: 0.5rem 1rem;
     font-family: var(--font-mono);
@@ -91,16 +94,18 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
     align-items: center;
     gap: 0.5rem;
     backdrop-filter: blur(10px);
-    z-index: 10; /* Asegura que la etiqueta quede por encima de los fragmentos */
+    z-index: 20;
   }
   .about-image__tag-dot {
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--color-accent-green);
     animation: blink 2s ease-in-out infinite;
   }
   @keyframes blink {
-    0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
   }
 
   .about-text { display: flex; flex-direction: column; gap: 1.75rem; }
@@ -119,7 +124,7 @@ import PhotoShatter from '../animations/PhotoShatter.astro';
     border-top: 1px solid var(--color-border);
     flex-wrap: wrap;
   }
-  .about-stat { display: flex; flex-direction: column; gap: 0.25rem; }
+  .about-stat  { display: flex; flex-direction: column; gap: 0.25rem; }
   .about-stat__n {
     font-family: var(--font-display);
     font-size: 2rem;

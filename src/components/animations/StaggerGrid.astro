@@ -18,28 +18,45 @@ const { class: className = '' } = Astro.props;
     document.querySelectorAll<HTMLElement>('.stagger-grid:not([data-sg])').forEach((grid) => {
       grid.dataset.sg = '1';
       const children = Array.from(grid.children) as HTMLElement[];
-      if (children.length === 0) return;
+      if (!children.length) return;
 
       gsap.set(children, { y: 60, opacity: 0 });
 
-      gsap.to(children, {
-        y: 0,
-        opacity: 1,
-        duration: 0.65,
-        stagger: 0.08,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: grid,
-          start: 'top 88%',
-          // ✅ FIX: 'bottom -5%' = el grid salió completamente del viewport por arriba
-          end: 'bottom -5%',
-          toggleActions: 'play reverse play reverse',
-        },
+      ScrollTrigger.create({
+        trigger: grid,
+        start: 'top 88%',
+        end:   'bottom 8%',
+        onEnter: () =>
+          gsap.to(children, {
+            y: 0, opacity: 1,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: 'power3.out',
+          }),
+        onEnterBack: () =>
+          gsap.to(children, {
+            y: 0, opacity: 1,
+            duration: 0.65,
+            stagger: 0.08,
+            ease: 'power3.out',
+          }),
+        onLeave: () =>
+          gsap.to(children, {
+            y: -40, opacity: 0,
+            duration: 0.4,
+            stagger: 0.04,
+            ease: 'power2.in',
+          }),
+        onLeaveBack: () =>
+          gsap.to(children, {
+            y: 60, opacity: 0,
+            duration: 0.4,
+            stagger: 0.04,
+            ease: 'power2.in',
+          }),
       });
     });
   }
 
-  // ✅ FIX: Eliminado el listener de 'astro:page-load' que causaba doble init.
-  // Layout.astro ya dispara 'animations:ready' en cada carga y navegación.
   document.addEventListener('animations:ready', initStagger);
 </script>

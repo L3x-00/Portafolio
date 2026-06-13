@@ -5,10 +5,9 @@ interface Props {
   class?: string;
 }
 const { src, alt, class: className = '' } = Astro.props;
-const uid = `px-${Math.random().toString(36).slice(2,8)}`;
 ---
 
-<div id={uid} class={`parallax-wrap ${className}`}>
+<div class={`parallax-wrap ${className}`}>
   <img src={src} alt={alt} class="parallax-img" loading="lazy" decoding="async" />
 </div>
 
@@ -20,23 +19,37 @@ const uid = `px-${Math.random().toString(36).slice(2,8)}`;
   function initParallax() {
     document.querySelectorAll<HTMLElement>('.parallax-wrap:not([data-px])').forEach((wrap) => {
       wrap.dataset.px = '1';
-      const img = wrap.querySelector('img');
+      const img = wrap.querySelector<HTMLImageElement>('img');
       if (!img) return;
+
+      // Parallax scrub — se reinicia automáticamente al entrar/salir
       gsap.to(img, {
-        yPercent: -18,
+        yPercent: -14,
         ease: 'none',
         scrollTrigger: {
           trigger: wrap,
           start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1.5,
+          end:   'bottom top',
+          scrub: 1.8,
         },
       });
+
+      // Fade de entrada y salida independiente
+      ScrollTrigger.create({
+        trigger: wrap,
+        start: 'top 92%',
+        end:   'bottom 5%',
+        onEnter:     () => gsap.to(wrap, { opacity: 1, duration: 0.7, ease: 'power2.out' }),
+        onEnterBack: () => gsap.to(wrap, { opacity: 1, duration: 0.7, ease: 'power2.out' }),
+        onLeave:     () => gsap.to(wrap, { opacity: 0, duration: 0.4, ease: 'power2.in' }),
+        onLeaveBack: () => gsap.to(wrap, { opacity: 0, duration: 0.4, ease: 'power2.in' }),
+      });
+
+      gsap.set(wrap, { opacity: 0 });
     });
   }
 
-  document.addEventListener('astro:page-load', initParallax);
-  initParallax();
+  document.addEventListener('animations:ready', initParallax);
 </script>
 
 <style>

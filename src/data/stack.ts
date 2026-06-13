@@ -49,4 +49,16 @@ export const stack: StackItem[] = [
   { name: 'DeepSeek',        icon: '/icons/deepseek-color.svg',  level: 'Avanzado',     color: '#4d6bfe', category: 'IA' },
   { name: 'Z.ai',            icon: '/icons/zai-color.svg',       level: 'Avanzado',     color: '#00d4ff', category: 'IA' },
   // Sugerencias IA: Midjourney, RunwayML, Stable Diffusion
+  
+  // ==========================================
+  // --- CLOUD & DEVOPS ---
+  // ==========================================
+  { name: 'Vercel',        icon: '/icons/vercel-color.svg',      level: 'Avanzado',     color: '#000000', category: 'Cloud' },
+  { name: 'Render',        icon: '/icons/render-color.svg',      level: 'Intermedio',   color: '#46E3B4', category: 'Cloud' },
+  { name: 'Supabase',      icon: '/icons/supabase-color.svg',    level: 'Avanzado',     color: '#3FCF8E', category: 'Cloud' },
+  { name: 'Firebase',      icon: '/icons/firebase-color.svg',    level: 'Intermedio',   color: '#FFCA28', category: 'Cloud' },
+  { name: 'Cloudflare',    icon: '/icons/cloudflare-color.svg',  level: 'Intermedio',   color: '#F38020', category: 'Cloud' },
+  { name: 'Brevo',         icon: '/icons/brevo-color.svg',       level: 'Básico',       color: '#0084FF', category: 'Cloud' },
+
+  // Sugerencias Cloud: DigitalOcean, Railway, Heroku
 ];

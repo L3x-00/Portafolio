@@ -19,28 +19,23 @@ const { delay = 0 } = Astro.props;
       el.dataset.rtext = '1';
       const delay = parseFloat(el.getAttribute('data-reveal-delay') || '0');
 
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.85,
-          delay,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: el,
-            start: 'top 90%',
-            // ✅ FIX: 'top -10%' = el elemento ya salió completamente del viewport por arriba
-            // Con 'top 30%' el reverse se disparaba mientras el elemento AÚN ERA VISIBLE
-            end: 'top -10%',
-            toggleActions: 'play reverse play reverse',
-          },
-        }
-      );
+      gsap.set(el, { y: 40, opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 90%',
+        end:   'top 5%',
+        onEnter: () =>
+          gsap.to(el, { y: 0, opacity: 1, duration: 0.85, delay, ease: 'power3.out' }),
+        onEnterBack: () =>
+          gsap.to(el, { y: 0, opacity: 1, duration: 0.85, delay, ease: 'power3.out' }),
+        onLeave: () =>
+          gsap.to(el, { y: -30, opacity: 0, duration: 0.4, ease: 'power2.in' }),
+        onLeaveBack: () =>
+          gsap.to(el, { y: 40,  opacity: 0, duration: 0.4, ease: 'power2.in' }),
+      });
     });
   }
 
-  // ✅ FIX: Solo un listener. Layout.astro dispara este evento en carga inicial Y navegación.
   document.addEventListener('animations:ready', initRevealText);
 </script>

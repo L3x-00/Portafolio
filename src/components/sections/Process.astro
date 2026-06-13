@@ -34,94 +34,292 @@ const steps = [
   <div class="container">
     <SectionTitle label="Mi proceso" title="Cómo trabajo." />
 
-    <div class="process-grid">
-      {steps.map((step, i) => (
-        <RevealText delay={i * 0.1}>
-          <div class="process-step">
-            <div class="process-step__header">
-              <span class="process-step__num">{step.num}</span>
-              <img
-                class="process-step__icon"
-                src={step.icon}
-                alt={step.title}
-              />
+    <div class="timeline-wrapper">
+      <div class="timeline" id="process-timeline">
+        {steps.map((step, i) => (
+          <div class="timeline-item">
+            <RevealText delay={i * 0.1}>
+              <div class="timeline-card" data-tilt data-step={i}>
+                <div class="timeline-card__header">
+                  <div class="timeline-card__icon-wrap">
+                    <img class="timeline-card__icon" src={step.icon} alt={step.title} />
+                  </div>
+                  <span class="timeline-card__num">{step.num}</span>
+                </div>
+                <h3 class="timeline-card__title">{step.title}</h3>
+                <p class="timeline-card__desc">{step.desc}</p>
+              </div>
+            </RevealText>
+
+            <div class="timeline-node" aria-hidden="true">
+              <span class="timeline-line"></span>
+              <span class="timeline-dot"></span>
             </div>
-            <h3 class="process-step__title">{step.title}</h3>
-            <p class="process-step__desc">{step.desc}</p>
-            {i < steps.length - 1 && <div class="process-step__connector"></div>}
           </div>
-        </RevealText>
-      ))}
+        ))}
+        
+        {/* El cohete que viaja por la línea */}
+        <div class="rocket-ship" id="process-rocket">🚀</div>
+      </div>
     </div>
   </div>
 </section>
 
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initProcessAnimations() {
+    const timeline = document.getElementById('process-timeline');
+    const rocket = document.getElementById('process-rocket');
+    const cards = document.querySelectorAll<HTMLElement>('[data-step]');
+    
+    if (!timeline || !rocket || !cards.length) return;
+
+    // 1. Animación del Cohete (Usando xPercent para un recorrido perfecto)
+    // xPercent: 0 significa el inicio (0%), xPercent: 100 significa el final (100%)
+    const rocketTween = gsap.fromTo(rocket, 
+      { xPercent: 0, scale: 1 }, 
+      {
+        xPercent: 100, 
+        scale: 1.2,
+        ease: "none",
+        scrollTrigger: {
+          trigger: timeline,
+          start: "top 80%",
+          end: "bottom 50%", // Se mueve mientras bajas por la sección
+          scrub: 1.5, // Se mueve con el scroll del ratón
+        }
+      }
+    );
+
+    // 2. Encendido de tarjetas al pasar el cohete
+    cards.forEach((card, index) => {
+      // Calculamos en qué porcentaje del recorrido está esta tarjeta
+      // Ej: 4 tarjetas -> Tarjeta 0: 0%, Tarjeta 1: 33%, Tarjeta 2: 66%, Tarjeta 3: 100%
+      const triggerPosition = index / (cards.length - 1); 
+      
+      ScrollTrigger.create({
+        trigger: timeline,
+        start: "top 80%",
+        end: "bottom 50%",
+        onUpdate: (self) => {
+          // Si el scroll supera el punto de la tarjeta, la encendemos
+          if (self.progress >= triggerPosition) {
+            card.classList.add('is-active');
+          } else {
+            card.classList.remove('is-active');
+          }
+        }
+      });
+    });
+
+    // 3. Efecto 3D Tilt
+    cards.forEach((card) => {
+      if (card.dataset.tiltActive) return;
+      card.dataset.tiltActive = '1';
+
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const tiltX = ((y / rect.height) - 0.5) * -6; 
+        const tiltY = ((x / rect.width) - 0.5) * 6;
+
+        gsap.to(card, {
+          rotateX: tiltX,
+          rotateY: tiltY,
+          duration: 0.3,
+          ease: 'power2.out',
+          transformPerspective: 800,
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 0.5,
+          ease: 'elastic.out(1, 0.5)', 
+        });
+      });
+    });
+  }
+
+  // Ejecutar cuando cargue la página
+  document.addEventListener('DOMContentLoaded', initProcessAnimations);
+</script>
 <style>
   .section-pad { padding: 7rem 0; }
-  .container   { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
 
-  .process-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.5rem;
+  /* ━━━ CONTENEDOR CON SCROLL ━━━ */
+  .timeline-wrapper {
+    overflow-x: auto;
+    scrollbar-width: none;
     margin-top: 4rem;
+    padding-bottom: 2rem;
+  }
+  .timeline-wrapper::-webkit-scrollbar { display: none; }
+
+  /* ━━━ LÍNEA DE TIEMPO HORIZONTAL ━━━ */
+  .timeline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
+    min-width: 900px; /* Fuerza el scroll en móviles */
+    padding: 0 1rem;
+  }
+
+  .timeline-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
     position: relative;
   }
 
-  .process-step {
+  /* ━━━ TARJETA DE FASE (Más compacta) ━━━ */
+  .timeline-card {
+    width: 90%; /* Tamaño reducido para dejar espacio */
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 2rem 1.5rem;
+    border-radius: 16px; 
+    padding: 1.5rem;
     position: relative;
-    transition: border-color 0.3s;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    margin-bottom: 2.5rem; /* Espacio para la línea */
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
   }
-  .process-step:hover { border-color: rgba(0,240,255,0.25); }
 
-  .process-step__header {
+  .timeline-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0, 240, 255, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Estado ACTIVO cuando el cohete pasa */
+  .timeline-card.is-active {
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow: 
+      0 12px 24px rgba(0, 0, 0, 0.3),
+      0 0 25px rgba(0, 240, 255, 0.1);
+  }
+
+  /* Cabecera */
+  .timeline-card__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
-  .process-step__num {
+  .timeline-card__num {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     color: var(--color-accent);
+    background: rgba(0, 240, 255, 0.08);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 240, 255, 0.15);
   }
-  .process-step__icon {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  background: transparent;
-  display: block;
+  .timeline-card__icon-wrap {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .timeline-card:hover .timeline-card__icon-wrap {
+    background: rgba(0,240,255,0.05);
+    border-color: rgba(0,240,255,0.2);
+  }
+  .timeline-card__icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+  .timeline-card:hover .timeline-card__icon {
+    transform: scale(1.15);
   }
 
-.process-step:hover .process-step__icon {
-  transform: scale(1.1);
-}
-
-  .process-step__title {
-    font-size: 1.125rem;
+  /* Textos */
+  .timeline-card__title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-text);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
-  .process-step__desc {
-    font-size: 0.9rem;
+  .timeline-card__desc {
+    font-size: 0.85rem;
     color: var(--color-muted);
-    line-height: 1.7;
+    line-height: 1.6;
+    flex: 1;
   }
 
-  .process-step__connector {
-    position: absolute;
-    top: 50%;
-    right: -0.75rem;
-    width: 1.5rem;
-    height: 1px;
-    background: linear-gradient(90deg, var(--color-accent), transparent);
-    z-index: 1;
+  /* ━━━ NODO, PUNTO Y LÍNEA ━━━ */
+  .timeline-node {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
   }
-  @media (max-width: 768px) { .process-step__connector { display: none; } }
+
+  .timeline-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 4px var(--color-bg);
+    flex-shrink: 0;
+  }
+
+  .timeline-line {
+    flex-grow: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-border), rgba(0, 240, 255, 0.2));
+  }
+
+  .timeline-item:last-child .timeline-line { display: none; }
+
+  .timeline-item:hover .timeline-dot,
+  .timeline-card.is-active ~ .timeline-node .timeline-dot {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    box-shadow: 0 0 12px var(--color-accent), 0 0 0 4px var(--color-bg);
+  }
+
+  /* ━━━ COHETE ━━━ */
+  .rocket-ship {
+    position: absolute;
+    bottom: 10px; /* Alineado con la línea */
+    left: 0;
+    font-size: 24px;
+    z-index: 10;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6));
+    pointer-events: none;
+    transition: bottom 0.3s ease;
+  }
+  
+  /* Efecto de "despegue" al hacer hover en una tarjeta */
+  .timeline-item:hover .rocket-ship {
+    bottom: 20px; 
+  }
 </style>

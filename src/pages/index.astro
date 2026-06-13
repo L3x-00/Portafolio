@@ -1,13 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/ui/Navbar.astro';
-import Footer from '../components/ui/Footer.astro';
 import Hero from '../components/sections/Hero.astro';
 import About from '../components/sections/About.astro';
 import Projects from '../components/sections/Projects.astro';
 import Stack from '../components/sections/Stack.astro';
 import Process from '../components/sections/Process.astro';
 import Contact from '../components/sections/Contact.astro';
+// ✅ Footer eliminado — Contact.astro lo incluye
 ---
 
 <Layout>
@@ -20,5 +20,4 @@ import Contact from '../components/sections/Contact.astro';
     <Process />
     <Contact />
   </main>
-  <Footer />
 </Layout>
