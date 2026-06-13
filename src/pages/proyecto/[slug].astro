@@ -29,11 +29,18 @@ const { project } = Astro.props;
           <span class="project-year">{project.year}</span>
         </div>
         <h1 class="project-title">{project.title}</h1>
-        <div class="project-tags">
+        
+        {/* ━━━ STACK TECNOLÓGICO CON SVG REALES ━━━ */}
+        <div class="project-stack">
           {project.tags.map(tag => (
-            <span class="project-tag">{tag}</span>
+            <div class="stack-item">
+              <img src={`/icons/${tag}-color.svg`} alt={tag} class="stack-item__icon" />
+              {/* Capitalizar la primera letra para que se vea mejor (php -> Php) */}
+              <span class="stack-item__name">{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
+            </div>
           ))}
         </div>
+
       </header>
 
       <div class="project-hero-image">
@@ -106,19 +113,45 @@ const { project } = Astro.props;
     line-height: 1.05;
   }
 
-  .project-tags {
+  /* ━━━ STACK TECNOLÓGICO (Horizontal, sin bordes) ━━━ */
+  .project-stack {
     display: flex;
-    gap: 0.75rem;
     flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
   }
-  .project-tag {
+
+  .stack-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: default;
+  }
+
+  .stack-item__icon {
+    width: 24px; /* Tamaño del icono */
+    height: 24px;
+    object-fit: contain;
+    filter: brightness(0.85);
+    transition: filter 0.3s ease, transform 0.3s ease;
+  }
+
+  .stack-item:hover .stack-item__icon {
+    filter: brightness(1.2) drop-shadow(0 0 6px currentColor); /* Brilla cyan al hover */
+    transform: scale(1.15); /* Crece un poco */
+  }
+
+  .stack-item__name {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.06em;
-    color: var(--color-accent);
-    border: 1px solid rgba(0,240,255,0.25);
-    padding: 0.35rem 0.9rem;
-    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
+  }
+
+  .stack-item:hover .stack-item__name {
+    color: var(--color-text); /* Se pone blanco al hover */
   }
 
   .project-hero-image {
@@ -141,12 +174,22 @@ const { project } = Astro.props;
   }
 
   .project-section-title {
-    font-size: 1rem;
+    font-size: 0.85rem; /* Un poco más pequeño y elegante */
     font-family: var(--font-mono);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.15em; /* Más espaciado */
     text-transform: uppercase;
     color: var(--color-accent);
     margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  /* Línea decorativa después del título */
+  .project-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-border), transparent);
   }
 
   .project-long-desc {
