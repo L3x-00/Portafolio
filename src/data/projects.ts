@@ -12,17 +12,20 @@ export const projects: Project[] = [
     url:     'https://github.com/L3x-00/San-Pedro',
     featured: true,
   },
-  {
-    slug:        'xtreme-performance',
-    title:       'Xtreme Performance',
-    year:        '2026',
-    tags:        ['PHP', 'JavaScript', 'CSS', 'HTML', 'Apache', 'MySQL'],
-    description: 'Sistema web multiplataforma para la automatización de órdenes de servicio, gestión de personal técnico y auditoría automatizada de facturación.',
-    longDesc:    'Solución de software empresarial orientada al sector automotriz y de servicios técnicos que digitaliza el control operativo del taller. El sistema implementa un control de acceso basado en roles (RBAC) incluyendo perfiles específicos para mecánicos, y cuenta con un módulo avanzado de auditoría mediante herramientas de diagnóstico de facturas. Diseñado con un enfoque en arquitectura segura (.htaccess optimizado), incluye integración de un chatbot asistente vía API, un motor de búsqueda y validación de datos en tiempo real para el seguimiento de tareas operativas, y una interfaz adaptativa con soporte nativo para modo oscuro optimizado para alta visibilidad.',
-    image:       '/images/xtreme.png', // Imagen profesional de taller/tecnología automotriz
-    url:         'https://xtremeperformancepe.com/',
-    featured:    true,
+ {
+  slug:        'xtreme-performance',
+  title:       'Xtreme Performance',
+  year:        '2026',
+  tags:        ['PHP', 'JavaScript', 'CSS', 'HTML', 'Apache', 'MySQL'],
+  description: 'Sistema web empresarial para la gestión operativa de talleres automotrices y servicios técnicos.',
+
+  longDesc:    'Plataforma orientada a la digitalización de procesos operativos en talleres automotrices, incluyendo la gestión de órdenes de servicio, seguimiento de trabajos técnicos y administración de usuarios. Mi participación se centró en actividades de pruebas funcionales (QA), validación de flujos de negocio y evaluación de la experiencia de usuario desde la perspectiva del cliente final. Colaboré en la identificación de incidencias, verificación de requisitos funcionales y retroalimentación para la mejora de procesos y usabilidad del sistema.',
+
+  image:       '/images/xtreme.png',
+  url:         'https://xtremeperformancepe.com/',
+  featured:    true,
   },
+
   {
     slug:        'servi-app',
     title:       'Servi - Marketplace de Servicios',
